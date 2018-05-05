@@ -181,7 +181,7 @@ public class Precondition {
         }
     }
 
-    @Test
+    @Ignore
     public void cameraPermission() throws Exception {
         UiObject launcherButton = findByResourceID("com.cloudminds.launcher3:id/all_apps_handle");
         UiObject camera = findByResourceID("com.cloudminds.launcher3:id/icon", "Camera");
@@ -192,6 +192,37 @@ public class Precondition {
         appInfo.clickAndWaitForNewWindow(LAUNCH_TIMEOUT);
         permissions.clickAndWaitForNewWindow(LAUNCH_TIMEOUT);
         enablePermissions();
+    }
+
+    @Ignore
+    public void skipPhotos() throws Exception {
+        launchPackage("com.google.android.apps.photos");
+        UiObject backUpSwitch = findByResourceID("com.google.android.apps.photos:id/auto_backup_switch");
+        UiObject confirm = findByResourceID("com.google.android.apps.photos:id/done_button");
+        UiObject keepBackupOff = findByResourceID("android:id/button2","KEEP");
+        backUpSwitch.click();
+        confirm.click();
+        keepBackupOff.clickAndWaitForNewWindow(LAUNCH_TIMEOUT);
+
+    }
+
+    @Test
+    public void skipSoundRecorder() throws Exception {
+        UiObject launcherButton = findByResourceID("com.cloudminds.launcher3:id/all_apps_handle");
+        launcherButton.clickAndWaitForNewWindow(LAUNCH_TIMEOUT);
+        UiObject recorder = findByText("Recorder");
+        UiObject appInfo = findByText("info");
+        UiObject permissions = findByText("Permissions");
+        for(int i=0;i<5;i++) {
+            mDevice.swipe(710,2087,710,1000,200);
+            if(recorder.exists())
+                break;
+        }
+        recorder.longClick();
+        appInfo.clickAndWaitForNewWindow(LAUNCH_TIMEOUT);
+        permissions.clickAndWaitForNewWindow(LAUNCH_TIMEOUT);
+        enablePermissions();
+
     }
 
     private void launchPackage(String packageName) {
@@ -207,14 +238,14 @@ public class Precondition {
         sleep(2000);
     }
 
-    private void enablePermissions() throws Exception {
+    private void enablePermissions() throws Exception { //3rd permission is not getting enabled
         UiObject container = findByResourceID("android:id/list");
         int noOfPermission = container.getChildCount();
         Log.i(TAG, "Number of permissions " + noOfPermission);
         for (int i = 0; i < noOfPermission; i++) {
             UiObject permission = container.getChild(new UiSelector().className("android.widget.LinearLayout").index(i));
             UiObject toggleSwitch = permission.getChild(new UiSelector().resourceId("android:id/switch_widget"));
-            //Log.i(TAG,"Toggle switch status : "+toggleSwitch.getText());
+            Log.i(TAG,"Toggle switch status : "+toggleSwitch.getText());
             if(toggleSwitch.getText().equals("OFF"))
                 toggleSwitch.click();
             sleep(1000);
@@ -235,8 +266,5 @@ public class Precondition {
         return mDevice.findObject(new UiSelector().textContains(text));
     }
 
-    private UiObject findByClass(String className) {
-        return mDevice.findObject(new UiSelector().className(className));
-    }
 
 }
